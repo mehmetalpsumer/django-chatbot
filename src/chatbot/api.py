@@ -3,14 +3,12 @@ import nltk
 import numpy as np
 import random
 import string
+
 from django.http import JsonResponse
+from nltk.chat.util import Chat, reflections
 
 from .models import UserMessage, BotMessage
-
-
-GREETING_INPUTS = ("hello", "hi", "greetings", "sup", "what's up","hey",)
-
-GREETING_RESPONSES = ["hi", "hey", "*nods*", "hi there", "hello", "I am glad! You are talking to me"]
+from .pairs import pairs
 
 
 def message(request):
@@ -23,15 +21,15 @@ def message(request):
         incoming_data = json.loads(request.body)
         user_message = incoming_data['userMessage']
         user_message_obj = UserMessage.create(
-            uid=incoming_data['uid'], 
+            uid=incoming_data['uid'],
             message=user_message
         )
         user_message_obj.save()
 
         # Create bot message
+        chat = Chat(pairs, reflections)
         user_message = user_message.lower()
-
-        bot_message = 'This message is from the backend.'
+        bot_message = chat.respond(user_message)
 
         # Create bot message object, save and send
         bot_message_obj = BotMessage.create(
