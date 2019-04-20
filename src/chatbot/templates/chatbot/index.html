@@ -1,0 +1,51 @@
+{% extends "chatbot/base.html" %}
+
+
+{% block title %}
+    Chat Bot
+{% endblock title %}
+    
+
+{% block content %}
+    <p>{{uid}}</p>
+
+    <form>
+        {% csrf_token %}
+        <input id='inMessage' name='userMessage' type='text'>
+        <button id='btnSend' type='button'>Send</button>
+    </form>
+{% endblock content %}
+    
+{% block scripts %}
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js'></script>
+    <script>
+        $(document).ready(() => {
+        });
+        
+        $("#btnSend").on('click', () => {
+            const message = $("#inMessage").val();
+            sendMessage(message);
+            $("#inMessage").val('');
+
+        });
+
+        async function sendMessage(msg) {
+            const url = '/api/message/';
+            const uid = '{{uid}}';
+            try {
+                const fetchResult = fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        userMessage: msg,
+                        uid: uid
+                    }),
+                });
+                const response = await fetchResult;
+                const jsonData = await response.json();
+                console.log(jsonData);
+            } catch(e) {
+                throw Error(e);
+            }
+        }
+    </script>
+{% endblock %}
